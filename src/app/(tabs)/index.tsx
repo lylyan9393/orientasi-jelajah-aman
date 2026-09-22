@@ -15,7 +15,7 @@ export default function HalamanUtama() {
   const [sedangMemuat, setSedangMemuat] = useState(false);
   const [pesanError, setPesanError] = useState<string | null>(null);
   
-  const teksTertunda = useDebounce(teksCari, 500);
+  const teksTertunda = useDebounce(teksCari, 800);
 
   useEffect(() => {
   if (teksTertunda.trim().length === 0) {
@@ -47,14 +47,22 @@ export default function HalamanUtama() {
 
     {pesanError && (
      <View>
-      <Text>{pesanError}</Text>
+      <Text accessibilityLabel="Pesan kesalahan pencarian kota">
+        {pesanError}
+      </Text>
       <Button title="Coba Lagi" onPress={() => ambilData(teksTertunda)} />
      </View>
      )}
 
      {!sedangMemuat && !pesanError && teksTertunda.length > 0 && hasil.length === 0
   && (
-      <Text>Kota tidak ditemukan</Text>
+      <Text accessibilityLabel="Pesan kota tidak ditemukan">
+        Kota tidak ditemukan
+      </Text>
+    )}
+
+    {teksTertunda.length > 0 && (
+      <Text>Ditemukan {hasil.length} kota</Text>
     )}
 
     {hasil.map((kota) => (
