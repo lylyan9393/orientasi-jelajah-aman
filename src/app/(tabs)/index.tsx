@@ -1,6 +1,12 @@
 // src/app/(tabs)/index.tsx
 import { useState, useEffect, useRef } from "react";
-import { View, Text, ActivityIndicator, Button, TouchableOpacity,} from "react-native";
+import {
+  View,
+  Text,
+  ActivityIndicator,
+  Button,
+  TouchableOpacity,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import SearchBox from "../../../components/SearchBox";
@@ -20,7 +26,9 @@ export default function HalamanUtama() {
   const [hasilPencarian, setHasilPencarian] = useState<HasilGeocoding[]>([]);
   const [kotaTerpilih, setKotaTerpilih] = useState<HasilGeocoding | null>(null);
   const [cuaca, setCuaca] = useState<DataCuacaLengkap | null>(null);
-  const [kualitasUdara, setKualitasUdara] = useState<DataKualitasUdara | null>(null,);
+  const [kualitasUdara, setKualitasUdara] = useState<DataKualitasUdara | null>(
+    null,
+  );
   const [sedangMemuat, setSedangMemuat] = useState(false);
   const [pesanError, setPesanError] = useState<string | null>(null);
 
@@ -32,7 +40,9 @@ export default function HalamanUtama() {
       setHasilPencarian([]);
       return;
     }
-    cariKota(teksTertunda).then(setHasilPencarian).catch(() => setHasilPencarian([]));
+    cariKota(teksTertunda)
+      .then(setHasilPencarian)
+      .catch(() => setHasilPencarian([]));
   }, [teksTertunda]);
 
   async function pilihKota(kota: HasilGeocoding) {
@@ -91,9 +101,22 @@ export default function HalamanUtama() {
       )}
 
       {cuaca && (
+        <Text>
+          Suhu hari ini: {cuaca.harian.suhuMinimal[0]}°C -{" "}
+          {cuaca.harian.suhuMaksimal[0]}°C
+        </Text>
+      )}
+
+      {cuaca && (
         <Text style={{ fontSize: 12, color: "#888" }}>
           Kondisi: {labelKodeCuaca(cuaca.saatIni.kodeCuaca)} • Angin
           {cuaca.saatIni.kecepatanAngin} km/j
+        </Text>
+      )}
+
+      {kualitasUdara && (
+        <Text style={{ fontSize: 12, color: "#888" }}>
+          PM2.5: {kualitasUdara.pm25} µg/m³ • PM10: {kualitasUdara.pm10} µg/m³
         </Text>
       )}
 
