@@ -20,6 +20,8 @@ import { useDebounce } from "../../hooks/use-debounce";
 import { cariKota } from "../../services/geocodingService";
 import { ambilCuaca } from "../../services/weatherService";
 import { ambilKualitasUdara } from "../../services/airQualityService";
+import { ambilSemuaFavorit } from "../../services/favoritStorage";
+import { KotaFavorit } from "../../../types/favorit";
 import { konversiTingkatAQI } from "../../services/weatherAdapter";
 import { labelKodeCuaca } from "../../constants/weatherCodes";
 import { HasilGeocoding } from "../../../types/geocoding";
@@ -34,6 +36,9 @@ export default function HalamanUtama() {
   const [kualitasUdara, setKualitasUdara] = useState<DataKualitasUdara | null>(
     null,
   );
+
+  const [daftarFavorit, setDaftarFavorit] = useState<KotaFavorit[]>([]);
+
   const [sedangMemuat, setSedangMemuat] = useState(false);
   const [pesanError, setPesanError] = useState<string | null>(null);
 
@@ -51,6 +56,10 @@ export default function HalamanUtama() {
       .then(setHasilPencarian)
       .catch(() => setHasilPencarian([]));
   }, [teksTertunda]);
+
+  useEffect(() => {
+    ambilSemuaFavorit().then(setDaftarFavorit);
+  }, []);
 
   async function pilihKota(kota: HasilGeocoding) {
     setKotaTerpilih(kota);
@@ -102,6 +111,10 @@ export default function HalamanUtama() {
     });
   }
 
+  const sudahFavorit =
+    kotaTerpilih !== null &&
+    daftarFavorit.some((kota) => kota.id === kotaTerpilih.id);
+
   return (
     <SafeAreaView style={{ flex: 1, padding: 16, gap: 16 }}>
       <SearchBox onCari={setTeksCari} />
@@ -134,6 +147,7 @@ export default function HalamanUtama() {
             suhu={cuaca.saatIni.suhu}
             tingkatAQI={konversiTingkatAQI(kualitasUdara.indeksAQI)}
           />
+          {!sudahFavorit && (
           <Button
             title="Tambahkan ke Favorit"
             onPress={() =>
@@ -148,8 +162,7 @@ export default function HalamanUtama() {
               })
             }
           />
-        </>
-      )}
+        )}
 
       {cuaca && (
         <Text>
@@ -170,8 +183,9 @@ export default function HalamanUtama() {
           PM2.5: {kualitasUdara.pm25} µg/m³ • PM10: {kualitasUdara.pm10} µg/m³
         </Text>
       )}
-
       <AtribusiCuaca />
+      </>
+      )}
     </SafeAreaView>
   );
 }
