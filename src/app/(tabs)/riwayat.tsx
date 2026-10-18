@@ -1,6 +1,6 @@
 // src/app/(tabs)/riwayat.tsx
 import { useState, useCallback } from "react";
-import { View, Text, Button, Alert } from "react-native";
+import { View, Text, Button, Alert, Platform } from "react-native";
 import { useFocusEffect } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -17,6 +17,25 @@ export default function TabRiwayat() {
   );
 
   function hapus(id: number, nama: string) {
+    if (Platform.OS === "web") {
+      const yakin = window.confirm(`Yakin hapus ${nama}?`);
+  
+      if (!yakin) return;
+  
+      hapusFavorit(id)
+        .then(() => {
+          setDaftarFavorit((prev) =>
+            prev.filter((k) => k.id !== id),
+          );
+        })
+        .catch((error) => {
+          console.error("Gagal menghapus favorit:", error);
+          window.alert("Gagal menghapus kota favorit.");
+        });
+  
+      return;
+    }
+  
     Alert.alert("Konfirmasi", `Yakin hapus ${nama}?`, [
       {
         text: "Batal",
@@ -26,8 +45,15 @@ export default function TabRiwayat() {
         text: "Hapus",
         style: "destructive",
         onPress: async () => {
-          await hapusFavorit(id);
-          setDaftarFavorit((prev) => prev.filter((k) => k.id !== id));
+          try {
+            await hapusFavorit(id);
+            setDaftarFavorit((prev) =>
+              prev.filter((k) => k.id !== id),
+            );
+          } catch (error) {
+            console.error("Gagal menghapus favorit:", error);
+            Alert.alert("Gagal", "Kota favorit tidak berhasil dihapus.");
+          }
         },
       },
     ]);
@@ -50,7 +76,13 @@ export default function TabRiwayat() {
           }}
         >
           <Text>{kota.nama}</Text>
-          <Button title="Hapus" onPress={() => hapus(kota.id, kota.nama)} />
+          <Button
+            title="Hapus"
+            onPress={() => {
+              console.log("Tombol diklik:", kota.nama);
+              hapus(kota.id, kota.nama);
+            }}
+          />
         </View>
       ))}
     </SafeAreaView>

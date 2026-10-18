@@ -1,5 +1,5 @@
 // src/app/(tabs)/index.tsx
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import {
   mintaIzinLokasi,
   ambilKoordinatSaatIni,
@@ -10,6 +10,7 @@ import {
   ActivityIndicator,
   Button,
   TouchableOpacity,
+  ScrollView,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -26,7 +27,7 @@ import { konversiTingkatAQI } from "../../services/weatherAdapter";
 import { labelKodeCuaca } from "../../constants/weatherCodes";
 import { HasilGeocoding } from "../../../types/geocoding";
 import { DataCuacaLengkap, DataKualitasUdara } from "../../../types/weather";
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 
 export default function HalamanUtama() {
   const [teksCari, setTeksCari] = useState("");
@@ -57,9 +58,11 @@ export default function HalamanUtama() {
       .catch(() => setHasilPencarian([]));
   }, [teksTertunda]);
 
-  useEffect(() => {
-    ambilSemuaFavorit().then(setDaftarFavorit);
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      ambilSemuaFavorit().then(setDaftarFavorit);
+    }, []),
+  );
 
   async function pilihKota(kota: HasilGeocoding) {
     setKotaTerpilih(kota);
@@ -117,6 +120,11 @@ export default function HalamanUtama() {
 
   return (
     <SafeAreaView style={{ flex: 1, padding: 16, gap: 16 }}>
+      <ScrollView
+      style={{ flex: 1 }}
+      contentContainerStyle={{ padding: 16, gap: 16 }}
+      keyboardShouldPersistTaps="handled"
+    >
       <SearchBox onCari={setTeksCari} />
 
       <Button title="Gunakan Lokasi Saat Ini" onPress={gunakanLokasiSaatIni} />
@@ -186,6 +194,8 @@ export default function HalamanUtama() {
       <AtribusiCuaca />
       </>
       )}
+    </ScrollView>
+      
     </SafeAreaView>
   );
 }
